@@ -29,12 +29,10 @@ function App() {
   const [parsedData, setParsedData] = useState<ParsedData | null>(null);
   const [progress, setProgress] = useState(0);
   const [error, setError] = useState<string | null>(null);
-  const [apiKeyConfigured, setApiKeyConfigured] = useState(false);
 
   // Check if API key is configured on component mount
   React.useEffect(() => {
     const hasApiKey = !!import.meta.env.VITE_OPENAI_API_KEY;
-    setApiKeyConfigured(hasApiKey);
     if (hasApiKey) {
       setStage('upload');
     }

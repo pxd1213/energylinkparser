@@ -156,7 +156,7 @@ const createProductionSheet = (data: ParsedData): any[][] => {
   const totalDeductions = Math.max(0, data.totalRevenue - data.netRevenue - totalTaxes); // All other costs
 
   // Convert line items to production format with enhanced parsing based on training data
-  const productionRows = data.lineItems.map((item, index) => {
+  const productionRows = data.lineItems.map((item) => {
     // Enhanced property information parsing using training data patterns
     const propertyInfo = parsePropertyInfoWithTrainingData(item.description);
     
