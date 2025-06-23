@@ -11,13 +11,14 @@ export const getOpenAIClient = async (): Promise<OpenAI> => {
 
     const client = new OpenAI({
       apiKey,
-      dangerouslyAllowBrowser: true
+      dangerouslyAllowBrowser: true,
+      baseURL: 'https://api.openai.com/v1'  // Explicitly set the base URL
     });
 
-    // Test the connection
+    // Test the connection with GPT-4 Vision
     try {
       const testResponse = await client.chat.completions.create({
-        model: "gpt-3.5-turbo",
+        model: "gpt-4-vision-preview",
         messages: [
           {
             role: "system",
@@ -29,7 +30,7 @@ export const getOpenAIClient = async (): Promise<OpenAI> => {
           }
         ]
       });
-      console.log('Successfully connected to OpenAI API');
+      console.log('Successfully connected to OpenAI GPT-4 Vision API');
       return client;
     } catch (error: any) {
       console.error('OpenAI API test failed:', error);
