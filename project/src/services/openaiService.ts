@@ -1,20 +1,14 @@
 import OpenAI from 'openai';
 
-// Type declaration for environment variables
-interface ImportMetaEnv {
-  readonly VITE_OPENAI_API_KEY: string;
-}
-
 // Initialize OpenAI client
 const openai = new OpenAI({
-  apiKey: (import.meta as unknown as { env: ImportMetaEnv }).env.VITE_OPENAI_API_KEY,
+  apiKey: import.meta.env.VITE_OPENAI_API_KEY,
   dangerouslyAllowBrowser: true // Note: In production, API calls should go through your backend
 });
 
 // Helper function to get the OpenAI client
 const getOpenAIClient = (): OpenAI => {
-  const apiKey = (import.meta as unknown as { env: ImportMetaEnv }).env.VITE_OPENAI_API_KEY;
-  if (!apiKey || apiKey === '') {
+  if (!openai.apiKey) {
     throw new Error('OpenAI API key is not configured. Please set up your API key first.');
   }
   return openai;
@@ -161,7 +155,7 @@ Focus on accuracy and precision - the extracted values must match the actual doc
     });
 
     const completion = await client.chat.completions.create({
-      model: "gpt-4-vision-preview", // Use GPT-4 Vision model
+      model: "gpt-4-vision-preview",
       messages: [
         {
           role: "system",
@@ -172,8 +166,8 @@ Focus on accuracy and precision - the extracted values must match the actual doc
           content: prompt
         }
       ],
-      temperature: 0.01, // Very low temperature for maximum precision
-      max_tokens: 2000 // Adjust as needed
+      temperature: 0.01,
+      max_tokens: 2000
     });
 
     onProgress?.(75);
