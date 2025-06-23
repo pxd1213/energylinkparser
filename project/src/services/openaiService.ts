@@ -1,28 +1,16 @@
 import OpenAI from 'openai';
-import { getOpenAIKey } from '../config';
 
-// Helper function to get the OpenAI client
-const getOpenAIClient = async (): Promise<OpenAI> => {
+export const getOpenAIClient = async (): Promise<OpenAI> => {
   try {
-    // Try multiple ways to get the API key
-    let apiKey: string = getOpenAIKey();
+    const apiKey = import.meta.env.VITE_OPENAI_API_KEY;
     
-    if (!apiKey || apiKey === '${OPENAI_API_KEY}' || apiKey === '{{ secrets.OPENAI_API_KEY }}') {
-      // Try direct environment access as fallback
-      apiKey = process.env.OPENAI_API_KEY || process.env.VITE_OPENAI_API_KEY || '';
-      
-      if (!apiKey) {
-        console.error('OpenAI API key not found in any source');
-        console.error('Configuration key:', getOpenAIKey());
-        console.error('Process env:', process.env.OPENAI_API_KEY);
-        console.error('Vite env:', process.env.VITE_OPENAI_API_KEY);
-        throw new Error('OpenAI API key is not properly configured. Please check your environment variables.');
-      }
+    if (!apiKey) {
+      console.error('OpenAI API key not found. Please set VITE_OPENAI_API_KEY in your environment variables.');
+      throw new Error('OpenAI API key is not configured');
     }
 
-    // Initialize OpenAI client
     const client = new OpenAI({
-      apiKey: apiKey,
+      apiKey,
       dangerouslyAllowBrowser: true
     });
 
@@ -30,24 +18,61 @@ const getOpenAIClient = async (): Promise<OpenAI> => {
     try {
       const testResponse = await client.chat.completions.create({
         model: "gpt-3.5-turbo",
-        messages: [{
-          role: "system",
-          content: "Test connection"
-        }],
-        max_tokens: 1
+        messages: [
+          {
+            role: "system",
+            content: "You are a helpful assistant."
+          },
+          {
+            role: "user",
+            content: "Hello, what is your API version?"
+          }
+        ]
       });
-      console.log('OpenAI connection test successful:', testResponse);
-    } catch (testError: any) {
-      console.error('OpenAI connection test failed:', testError);
-      throw new Error(`OpenAI connection test failed: ${testError.message}`);
+      console.log('Successfully connected to OpenAI API');
+      return client;
+    } catch (error: any) {
+      console.error('OpenAI API test failed:', error);
+      throw new Error(`OpenAI API test failed: ${error.message}`);
     }
-
-    return client;
   } catch (error: any) {
     console.error('Failed to initialize OpenAI client:', error);
     throw new Error(`OpenAI initialization error: ${error.message}`);
   }
 };
+
+export interface ParsedRevenueData {
+  company: string;
+  period: string;
+  totalRevenue: number;
+  lineItems: Array<{
+    description: string;
+    quantity: number;
+    rate: number;
+    amount: number;
+  }>;
+  taxes: number;
+  netRevenue: number;
+}
+
+export const parseRevenueStatementWithAI = async (
+  imageBase64Array: string[],
+  onProgress?: (progress: number) => void
+): Promise<ParsedRevenueData> => {
+  try {
+    onProgress?.(25);
+
+    const client = await getOpenAIClient();
+
+    const prompt = `
+You are an expert financial data extraction specialist for oil & gas revenue statements. Analyze these PDF revenue statement pages and extract structured data with EXACT precision matching the training example.
+
+CRITICAL TRAINING EXAMPLE - EXACT VALUES TO MATCH:
+Property: "Verde 13-2HZ NBRR" (complete well name exactly as shown)
+`;
+
+    // Rest of the existing implementation
+    // ...
 
 export interface ParsedRevenueData {
   company: string;
