@@ -1,4 +1,20 @@
-import { Blob } from 'buffer';
+import { Configuration, OpenAIApi } from 'openai';
+import { Buffer } from 'buffer';
+import XLSX from 'xlsx';
+import type { OpenAIApi } from 'openai';
+import type * as XLSXTypes from 'xlsx';
+import type { Client } from 'openai';
+
+declare global {
+  var Buffer: typeof Buffer;
+  var XLSX: typeof XLSXTypes;
+  var client: Client;
+}
+
+const configuration = new Configuration({
+  apiKey: import.meta.env.VITE_OPENAI_API_KEY,
+});
+const openai = new OpenAIApi(configuration) as OpenAIApi;
 
 export interface OpenAIResponse {
   success: boolean;
@@ -67,8 +83,6 @@ export const parseRevenueStatement = async (pdfBase64: string): Promise<OpenAIRe
   }
 };
 
-import * as XLSX from 'xlsx';
-
 export const convertToExcel = async (data: ParsedRevenueData): Promise<Blob> => {
   try {
     // Prepare the data for Excel
@@ -109,8 +123,6 @@ export const parseRevenueStatementWithAI = async (
 ): Promise<ParsedRevenueData> => {
   try {
     onProgress?.(25);
-
-    const response = await parseRevenueStatement(`
 
     const prompt = `
 You are an expert financial data extraction specialist for oil & gas revenue statements. Analyze these PDF revenue statement pages and extract structured data with EXACT precision matching the training example.
@@ -288,23 +300,6 @@ Focus on accuracy and precision - the extracted values must match the actual doc
       onProgress?.(100);
       return parsedData;
     } catch (parseError) {
-      console.error('JSON parsing error:', parseError);
-      console.error('Raw response:', response);
-      throw new Error('Failed to parse AI response as JSON');
-    }
-  } catch (error) {
-    console.error('OpenAI API error:', error);
-    
-    // Handle specific OpenAI API errors with user-friendly messages
-    if (error instanceof Error) {
-      if (error.message.includes('429')) {
-        throw new Error('OpenAI API quota exceeded. Please check your OpenAI account billing and usage limits at platform.openai.com, then try again.');
-      } else if (error.message.includes('401')) {
-        throw new Error('Invalid OpenAI API key. Please check your API key configuration.');
-      } else if (error.message.includes('403')) {
-        throw new Error('OpenAI API access forbidden. Please verify your API key permissions.');
-      } else if (error.message.includes('500') || error.message.includes('502') || error.message.includes('503')) {
-        throw new Error('OpenAI service is temporarily unavailable. Please try again in a few minutes.');
       }
     }
     
