@@ -72,7 +72,7 @@ export const parseRevenueStatementWithAI = async (
   try {
     onProgress?.(25);
 
-    const client = await getOpenAIClient();
+    const response = await parseRevenueStatement(`
 
     const prompt = `
 You are an expert financial data extraction specialist for oil & gas revenue statements. Analyze these PDF revenue statement pages and extract structured data with EXACT precision matching the training example.
