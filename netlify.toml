@@ -18,5 +18,10 @@
   to = "/index.html"
   status = 200
 
-[secrets]
-  OPENAI_API_KEY = "${{secrets.OPENAI_API_KEY}}"
+[functions]
+  node_bundler = "esbuild"
+  node_version = "20"
+
+[functions.openai]
+  memory_size = 1024
+  timeout = 30

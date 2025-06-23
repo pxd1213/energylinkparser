@@ -1,43 +1,53 @@
-import OpenAI from 'openai';
+export interface OpenAIResponse {
+  success: boolean;
+  response?: any;
+  error?: string;
+}
 
-export const getOpenAIClient = async (): Promise<OpenAI> => {
+export const testOpenAIConnection = async (): Promise<OpenAIResponse> => {
   try {
-    const apiKey = import.meta.env.VITE_OPENAI_API_KEY;
-    
-    if (!apiKey) {
-      console.error('OpenAI API key not found. Please set VITE_OPENAI_API_KEY in your environment variables.');
-      throw new Error('OpenAI API key is not configured');
-    }
-
-    const client = new OpenAI({
-      apiKey,
-      baseURL: 'https://api.openai.com/v1'
+    const response = await fetch('/.netlify/functions/openai', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        type: 'test'
+      })
     });
 
-    // Test the connection with GPT-4 Vision
-    try {
-      const testResponse = await client.chat.completions.create({
-        model: "gpt-4-vision-preview",
-        messages: [
-          {
-            role: "system",
-            content: "You are a helpful assistant."
-          },
-          {
-            role: "user",
-            content: "Hello, what is your API version?"
-          }
-        ]
-      });
-      console.log('Successfully connected to OpenAI GPT-4 Vision API');
-      return client;
-    } catch (error: any) {
-      console.error('OpenAI API test failed:', error);
-      throw new Error(`OpenAI API test failed: ${error.message}`);
+    const data = await response.json();
+    if (!response.ok) {
+      throw new Error(data.error || 'Failed to connect to OpenAI');
     }
-  } catch (error: any) {
-    console.error('Failed to initialize OpenAI client:', error);
-    throw new Error(`OpenAI initialization error: ${error.message}`);
+    return data;
+  } catch (error) {
+    console.error('OpenAI connection test failed:', error);
+    throw error;
+  }
+};
+
+export const parseRevenueStatement = async (prompt: string): Promise<OpenAIResponse> => {
+  try {
+    const response = await fetch('/.netlify/functions/openai', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        type: 'parseRevenue',
+        data: { prompt }
+      })
+    });
+
+    const data = await response.json();
+    if (!response.ok) {
+      throw new Error(data.error || 'Failed to parse revenue statement');
+    }
+    return data;
+  } catch (error) {
+    console.error('Revenue statement parsing failed:', error);
+    throw error;
   }
 };
 
