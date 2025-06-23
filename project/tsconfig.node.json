@@ -7,9 +7,9 @@
     "module": "ESNext",
     "moduleResolution": "bundler",
     "allowSyntheticDefaultImports": true,
-    "types": ["node", "vite/client"],
+    "types": ["node"],
     "esModuleInterop": true,
-    "noEmit": true,
+    "noEmit": false,
 
     /* Linting */
     "strict": true,
