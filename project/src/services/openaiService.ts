@@ -6,9 +6,10 @@ const getOpenAIClient = async (): Promise<OpenAI> => {
     // Get the API key from environment variables
     const apiKey = import.meta.env.VITE_OPENAI_API_KEY;
     
-    if (!apiKey) {
-      console.error('OpenAI API key not found in environment variables');
-      throw new Error('OpenAI API key is not configured. Please set up your API key first.');
+    if (!apiKey || apiKey === '${OPENAI_API_KEY}' || apiKey === '{{ secrets.OPENAI_API_KEY }}') {
+      console.error('OpenAI API key not found or not properly configured');
+      console.error('Current API key:', apiKey);
+      throw new Error('OpenAI API key is not properly configured. Please check your environment variables.');
     }
 
     // Initialize OpenAI client
@@ -16,6 +17,22 @@ const getOpenAIClient = async (): Promise<OpenAI> => {
       apiKey: apiKey,
       dangerouslyAllowBrowser: true
     });
+
+    // Test the connection
+    try {
+      const testResponse = await client.chat.completions.create({
+        model: "gpt-3.5-turbo",
+        messages: [{
+          role: "system",
+          content: "Test connection"
+        }],
+        max_tokens: 1
+      });
+      console.log('OpenAI connection test successful:', testResponse);
+    } catch (testError: any) {
+      console.error('OpenAI connection test failed:', testError);
+      throw new Error(`OpenAI connection test failed: ${testError.message}`);
+    }
 
     return client;
   } catch (error: any) {
