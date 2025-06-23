@@ -69,39 +69,6 @@ You are an expert financial data extraction specialist for oil & gas revenue sta
 
 CRITICAL TRAINING EXAMPLE - EXACT VALUES TO MATCH:
 Property: "Verde 13-2HZ NBRR" (complete well name exactly as shown)
-`;
-
-    // Rest of the existing implementation
-    // ...
-
-export interface ParsedRevenueData {
-  company: string;
-  period: string;
-  totalRevenue: number;
-  lineItems: Array<{
-    description: string;
-    quantity: number;
-    rate: number;
-    amount: number;
-  }>;
-  taxes: number;
-  netRevenue: number;
-}
-
-export const parseRevenueStatementWithAI = async (
-  imageBase64Array: string[],
-  onProgress?: (progress: number) => void
-): Promise<ParsedRevenueData> => {
-  try {
-    onProgress?.(25);
-
-    const client = await getOpenAIClient();
-
-    const prompt = `
-You are an expert financial data extraction specialist for oil & gas revenue statements. Analyze these PDF revenue statement pages and extract structured data with EXACT precision matching the training example.
-
-CRITICAL TRAINING EXAMPLE - EXACT VALUES TO MATCH:
-Property: "Verde 13-2HZ NBRR" (complete well name exactly as shown)
 Property Number: "138366-1" (exact identifier)
 Product Type: "GAS" (product category)
 
@@ -277,7 +244,6 @@ Focus on accuracy and precision - the extracted values must match the actual doc
       console.error('Raw response:', response);
       throw new Error('Failed to parse AI response as JSON');
     }
-
   } catch (error) {
     console.error('OpenAI API error:', error);
     
@@ -296,4 +262,4 @@ Focus on accuracy and precision - the extracted values must match the actual doc
     
     throw new Error(`AI parsing failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
   }
-}
+};
