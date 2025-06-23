@@ -4,8 +4,10 @@ import FileUpload from './components/FileUpload';
 import ProcessingStatus from './components/ProcessingStatus';
 import DataPreview from './components/DataPreview';
 import ApiKeySetup from './components/ApiKeySetup';
-import { parseRevenueStatement } from './utils/aiParser';
-import { generateExcelFile } from './utils/excelGenerator';
+import OpenAITest from './components/OpenAITest';
+import TestParser from './components/TestParser';
+import { parseRevenueStatement } from '../services/openaiService';
+import { convertPDFPagesToImages } from '../services/pdfService';
 
 type ProcessingStage = 'setup' | 'upload' | 'parsing' | 'generating' | 'complete' | 'error';
 
@@ -102,18 +104,15 @@ function App() {
               <h1 className="text-xl font-semibold text-gray-900">Revenue Statement Parser</h1>
             </div>
             <div className="text-sm text-gray-500">
-              AI-Powered Document Processing
-            </div>
-          </div>
         </div>
-      </header>
+        
+        {/* Add API Test section */}
+        <div className="bg-white rounded-lg shadow-md p-6">
+          <OpenAITest />
+        </div>
 
-      {/* Main Content */}
-      <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="text-center mb-12">
-          <h2 className="text-3xl font-bold text-gray-900 mb-4">
-            Convert Revenue Statements to Excel
-          </h2>
+        <div className="bg-white rounded-lg shadow-md p-6 mt-8">
+          <h2 className="text-xl font-semibold mb-4">Upload Revenue Statement</h2>
           <p className="text-lg text-gray-600 max-w-2xl mx-auto">
             Upload your PDF revenue statement and our AI will automatically parse the data 
             into a standardized Excel format for easy accounting and analysis.
@@ -193,6 +192,7 @@ function App() {
         <div className="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden">
           {stage === 'setup' && (
             <ApiKeySetup onConfigured={handleApiKeyConfigured} />
+            <TestParser />
           )}
 
           {stage === 'upload' && (

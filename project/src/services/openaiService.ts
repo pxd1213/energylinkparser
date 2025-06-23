@@ -1,7 +1,23 @@
+import { Blob } from 'buffer';
+
 export interface OpenAIResponse {
   success: boolean;
   response?: any;
   error?: string;
+}
+
+export interface ParsedRevenueData {
+  company: string;
+  period: string;
+  totalRevenue: number;
+  lineItems: Array<{
+    description: string;
+    quantity: number;
+    rate: number;
+    amount: number;
+  }>
+  taxes: number;
+  netRevenue: number;
 }
 
 export const testOpenAIConnection = async (): Promise<OpenAIResponse> => {
@@ -27,7 +43,7 @@ export const testOpenAIConnection = async (): Promise<OpenAIResponse> => {
   }
 };
 
-export const parseRevenueStatement = async (prompt: string): Promise<OpenAIResponse> => {
+export const parseRevenueStatement = async (pdfBase64: string): Promise<OpenAIResponse> => {
   try {
     const response = await fetch('/.netlify/functions/openai', {
       method: 'POST',
@@ -36,7 +52,7 @@ export const parseRevenueStatement = async (prompt: string): Promise<OpenAIRespo
       },
       body: JSON.stringify({
         type: 'parseRevenue',
-        data: { prompt }
+        data: { pdfBase64 }
       })
     });
 
@@ -51,19 +67,41 @@ export const parseRevenueStatement = async (prompt: string): Promise<OpenAIRespo
   }
 };
 
-export interface ParsedRevenueData {
-  company: string;
-  period: string;
-  totalRevenue: number;
-  lineItems: Array<{
-    description: string;
-    quantity: number;
-    rate: number;
-    amount: number;
-  }>;
-  taxes: number;
-  netRevenue: number;
-}
+import * as XLSX from 'xlsx';
+
+export const convertToExcel = async (data: ParsedRevenueData): Promise<Blob> => {
+  try {
+    // Prepare the data for Excel
+    const headerRow = [
+      { 'Company': data.company },
+      { 'Period': data.period },
+      { 'Total Revenue': data.totalRevenue },
+      { 'Taxes': data.taxes },
+      { 'Net Revenue': data.netRevenue }
+    ];
+
+    const lineItems = data.lineItems.map(item => ({
+      'Description': item.description,
+      'Quantity': item.quantity,
+      'Rate': item.rate,
+      'Amount': item.amount
+    }));
+
+    // Create worksheet
+    const ws = XLSX.utils.json_to_sheet([...headerRow, ...lineItems]);
+
+    // Create workbook
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'Revenue Statement');
+    
+    // Write to array buffer and create Blob
+    const wbout = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
+    return new Blob([wbout], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+  } catch (error) {
+    console.error('Excel conversion failed:', error);
+    throw error;
+  }
+};
 
 export const parseRevenueStatementWithAI = async (
   imageBase64Array: string[],

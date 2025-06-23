@@ -1,0 +1,25 @@
+const PDFDocument = require('pdfkit');
+const fs = require('fs');
+
+// Create a document
+const doc = new PDFDocument();
+
+// Pipe its output somewhere, like to a file or HTTP response
+const stream = fs.createWriteStream('test.pdf');
+doc.pipe(stream);
+
+// Add some text
+const text = `
+Company: Test Energy Corp
+Period: Q1 2024
+
+Property: Test Well 1
+Amount: $1000.00
+
+Property: Test Well 2
+Amount: $1500.00
+`;
+
+doc.fontSize(12).text(text, 50, 50);
+
+doc.end();
