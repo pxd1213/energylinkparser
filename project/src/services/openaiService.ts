@@ -162,9 +162,8 @@ Focus on accuracy and precision - the extracted values must match the actual doc
 
     // Prepare messages array with proper OpenAI message format
     const messages: Array<{
-      role: 'system' | 'user' | 'assistant' | 'function',
-      content: string,
-      name?: string
+      role: 'system' | 'user' | 'assistant',
+      content: string
     }> = [
       {
         role: "system",
