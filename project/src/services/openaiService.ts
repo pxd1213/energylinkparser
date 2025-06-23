@@ -135,37 +135,29 @@ Focus on accuracy and precision - the extracted values must match the actual doc
 
     onProgress?.(50);
 
-    // Prepare content array with text prompt and all images
-    const content: Array<any> = [
+    // Prepare messages array with system and user messages
+    const messages: Array<{ role: string; content: string }> = [
       {
-        type: "text",
-        text: prompt
+        role: "system",
+        content: "You are a financial data extraction expert specializing in oil & gas revenue statements. Always respond with valid JSON only. Extract exact values from documents with precision. Distinguish carefully between taxes (severance, federal, state, withholding) and deductions (all other operational costs). Verify calculations match expected net payments. Use the training example as your guide: Verde 13-2HZ NBRR (138366-1) GAS with taxes -14.25, deductions -435.42, net 168.85."
+      },
+      {
+        role: "user",
+        content: prompt
       }
     ];
 
-    // Add all PDF page images to the content
+    // Add all PDF page images to the messages
     imageBase64Array.forEach((imageBase64) => {
-      content.push({
-        type: "image_url",
-        image_url: {
-          url: `data:image/png;base64,${imageBase64}`,
-          detail: "high"
-        }
+      messages.push({
+        role: "user",
+        content: `![Revenue Statement Page](data:image/png;base64,${imageBase64})`
       });
     });
 
     const completion = await client.chat.completions.create({
       model: "gpt-4-vision-preview",
-      messages: [
-        {
-          role: "system",
-          content: "You are a financial data extraction expert specializing in oil & gas revenue statements. Always respond with valid JSON only. Extract exact values from documents with precision. Distinguish carefully between taxes (severance, federal, state, withholding) and deductions (all other operational costs). Verify calculations match expected net payments. Use the training example as your guide: Verde 13-2HZ NBRR (138366-1) GAS with taxes -14.25, deductions -435.42, net 168.85."
-        },
-        {
-          role: "user",
-          content: prompt
-        }
-      ],
+      messages: messages,
       temperature: 0.01,
       max_tokens: 2000
     });
