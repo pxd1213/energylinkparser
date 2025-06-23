@@ -4,13 +4,20 @@ import { getOpenAIKey } from '../config';
 // Helper function to get the OpenAI client
 const getOpenAIClient = async (): Promise<OpenAI> => {
   try {
-    // Get API key from configuration
-    const apiKey = getOpenAIKey();
+    // Try multiple ways to get the API key
+    let apiKey = getOpenAIKey();
     
     if (!apiKey || apiKey === '${OPENAI_API_KEY}' || apiKey === '{{ secrets.OPENAI_API_KEY }}') {
-      console.error('OpenAI API key not found or not properly configured');
-      console.error('Current API key:', apiKey);
-      throw new Error('OpenAI API key is not properly configured. Please check your environment variables.');
+      // Try direct environment access as fallback
+      apiKey = process.env.OPENAI_API_KEY || process.env.VITE_OPENAI_API_KEY;
+      
+      if (!apiKey) {
+        console.error('OpenAI API key not found in any source');
+        console.error('Configuration key:', getOpenAIKey());
+        console.error('Process env:', process.env.OPENAI_API_KEY);
+        console.error('Vite env:', process.env.VITE_OPENAI_API_KEY);
+        throw new Error('OpenAI API key is not properly configured. Please check your environment variables.');
+      }
     }
 
     // Initialize OpenAI client
