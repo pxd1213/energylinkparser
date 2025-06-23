@@ -13,6 +13,7 @@
 [context.production.environment]
   VITE_OPENAI_API_KEY = "${OPENAI_API_KEY}"
   OPENAI_API_KEY = "${OPENAI_API_KEY}"
+  API_KEY = "${OPENAI_API_KEY}"
 
 [[redirects]]
   from = "/*"
