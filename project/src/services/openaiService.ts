@@ -296,4 +296,4 @@ Focus on accuracy and precision - the extracted values must match the actual doc
     
     throw new Error(`AI parsing failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
   }
-};
+}
