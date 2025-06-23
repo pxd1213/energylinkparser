@@ -160,8 +160,12 @@ Focus on accuracy and precision - the extracted values must match the actual doc
 
     onProgress?.(50);
 
-    // Prepare messages array with system and user messages
-    const messages: Array<{ role: string; content: string }> = [
+    // Prepare messages array with proper OpenAI message format
+    const messages: Array<{
+      role: 'system' | 'user' | 'assistant' | 'function',
+      content: string,
+      name?: string
+    }> = [
       {
         role: "system",
         content: "You are a financial data extraction expert specializing in oil & gas revenue statements. Always respond with valid JSON only. Extract exact values from documents with precision. Distinguish carefully between taxes (severance, federal, state, withholding) and deductions (all other operational costs). Verify calculations match expected net payments. Use the training example as your guide: Verde 13-2HZ NBRR (138366-1) GAS with taxes -14.25, deductions -435.42, net 168.85."
@@ -180,11 +184,20 @@ Focus on accuracy and precision - the extracted values must match the actual doc
       });
     });
 
+    // Add a final system message to ensure proper JSON response
+    messages.push({
+      role: "system",
+      content: "Your response must be valid JSON only. Do not include any additional text or explanations."
+    });
+
     const completion = await client.chat.completions.create({
       model: "gpt-4-vision-preview",
       messages: messages,
       temperature: 0.01,
-      max_tokens: 2000
+      max_tokens: 2000,
+      response_format: {
+        type: "json_object"
+      }
     });
 
     onProgress?.(75);
