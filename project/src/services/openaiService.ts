@@ -161,7 +161,7 @@ Focus on accuracy and precision - the extracted values must match the actual doc
     });
 
     const completion = await openai.chat.completions.create({
-      model: "gpt-4o", // Use GPT-4 with vision capabilities
+      model: "gpt-4-vision-preview", // Use GPT-4 Vision model
       messages: [
         {
           role: "system",
