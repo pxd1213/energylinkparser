@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import { parseRevenueStatement } from '../services/openaiService';
 import { convertPDFPagesToImages } from '../services/pdfService';
+import { ParsedData } from '../types/types';
 
 export default function TestParser() {
-  const [result, setResult] = useState<any>(null);
+  const [result, setResult] = useState<ParsedData | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -11,48 +12,54 @@ export default function TestParser() {
     try {
       setIsLoading(true);
       
-      // Read the test PDF file
-      const testPdf = await fetch('test.pdf');
-      const blob = await testPdf.blob();
-      const file = new File([blob], 'test.pdf', { type: 'application/pdf' });
+      // Create a sample PDF file for testing
+      const samplePdf = new Blob([''], { type: 'application/pdf' });
+      const file = new File([samplePdf], 'sample.pdf', { type: 'application/pdf' });
 
       // Convert PDF to images
       const images = await convertPDFPagesToImages(file);
       
       // Parse the first page
-      const result = await parseRevenueStatement(images[0]);
+      const parsedResult = await parseRevenueStatement(images[0]);
       
-      setResult(result);
+      setResult(parsedResult);
       setError(null);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'An error occurred');
+      const errorMessage = err instanceof Error ? err.message : 'An error occurred during parsing';
+      setError(errorMessage);
+      console.error('Parsing error:', err);
     } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <div className="p-4">
-      <h1 className="text-2xl font-bold mb-4">Test Parser</h1>
-      <button
-        onClick={handleTest}
-        disabled={isLoading}
-        className="bg-blue-500 text-white px-4 py-2 rounded disabled:opacity-50"
-      >
-        {isLoading ? 'Testing...' : 'Run Test'}
-      </button>
+    <>
+      <div className="mt-8">
+        <button
+          onClick={handleTest}
+          className="px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+          disabled={isLoading}
+        >
+          {isLoading ? 'Testing...' : 'Test Parser'}
+        </button>
 
-      {error && (
-        <div className="mt-4 p-4 bg-red-100 text-red-700 rounded">
-          {error}
-        </div>
-      )}
+        {error && (
+          <div className="mt-4 p-4 bg-red-50 text-red-700 rounded-md">
+            <div className="font-medium">Error</div>
+            <div className="mt-1 text-sm text-red-600">{error}</div>
+          </div>
+        )}
 
-      {result && (
-        <div className="mt-4 p-4 bg-green-100 text-green-700 rounded">
-          <pre>{JSON.stringify(result, null, 2)}</pre>
-        </div>
-      )}
-    </div>
+        {result && (
+          <div className="mt-4 p-4 bg-green-50 text-green-700 rounded-md">
+            <div className="font-medium">Parsed Data</div>
+            <div className="mt-2">
+              <pre className="text-sm whitespace-pre-wrap">{JSON.stringify(result, null, 2)}</pre>
+            </div>
+          </div>
+        )}
+      </div>
+    </>
   );
 }
