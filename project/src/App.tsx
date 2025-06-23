@@ -39,8 +39,10 @@ function App() {
   }, []);
 
   const handleApiKeyConfigured = useCallback(() => {
-    setApiKeyConfigured(true);
-    setStage('upload');
+    const hasApiKey = !!import.meta.env.VITE_OPENAI_API_KEY;
+    if (hasApiKey) {
+      setStage('upload');
+    }
   }, []);
 
   const handleFileUpload = useCallback(async (file: File) => {
