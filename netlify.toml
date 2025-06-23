@@ -1,9 +1,13 @@
 [build]
-  command = "cd project && npm run build"
-  publish = "project/dist"
+  command = "npm install && npm run build"
+  publish = "dist"
 
 [build.environment]
   NODE_VERSION = "18"
+
+[context.production]
+  git_branch = "main"
+  git_repository = "github.com/pxd1213/energylinkparser"
 
 [[redirects]]
   from = "/*"
