@@ -1,29 +1,15 @@
 import OpenAI from 'openai';
+import { getOpenAIKey } from '../config';
 
 // Helper function to get the OpenAI client
 const getOpenAIClient = async (): Promise<OpenAI> => {
   try {
-    // Try multiple environment variables
-    const apiKeySources = [
-      import.meta.env.VITE_OPENAI_API_KEY,
-      import.meta.env.OPENAI_API_KEY,
-      import.meta.env.API_KEY,
-      process.env.VITE_OPENAI_API_KEY,
-      process.env.OPENAI_API_KEY,
-      process.env.API_KEY
-    ];
-
-    let apiKey = apiKeySources.find(key => key && key !== '${OPENAI_API_KEY}' && key !== '{{ secrets.OPENAI_API_KEY }}');
+    // Get API key from configuration
+    const apiKey = getOpenAIKey();
     
-    if (!apiKey) {
+    if (!apiKey || apiKey === '${OPENAI_API_KEY}' || apiKey === '{{ secrets.OPENAI_API_KEY }}') {
       console.error('OpenAI API key not found or not properly configured');
-      console.error('Environment variables checked:');
-      console.error('VITE_OPENAI_API_KEY:', import.meta.env.VITE_OPENAI_API_KEY);
-      console.error('OPENAI_API_KEY:', import.meta.env.OPENAI_API_KEY);
-      console.error('API_KEY:', import.meta.env.API_KEY);
-      console.error('process.env.VITE_OPENAI_API_KEY:', process.env.VITE_OPENAI_API_KEY);
-      console.error('process.env.OPENAI_API_KEY:', process.env.OPENAI_API_KEY);
-      console.error('process.env.API_KEY:', process.env.API_KEY);
+      console.error('Current API key:', apiKey);
       throw new Error('OpenAI API key is not properly configured. Please check your environment variables.');
     }
 
