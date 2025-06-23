@@ -165,15 +165,15 @@ Focus on accuracy and precision - the extracted values must match the actual doc
       messages: [
         {
           role: "system",
-          content: "You are a financial data extraction expert specializing in oil & gas revenue statements. Extract structured data from PDF images with exact precision matching the training example."
+          content: "You are a financial data extraction expert specializing in oil & gas revenue statements. Always respond with valid JSON only. Extract exact values from documents with precision. Distinguish carefully between taxes (severance, federal, state, withholding) and deductions (all other operational costs). Verify calculations match expected net payments. Use the training example as your guide: Verde 13-2HZ NBRR (138366-1) GAS with taxes -14.25, deductions -435.42, net 168.85."
         },
         {
-          type: "text",
-          text: prompt
+          role: "user",
+          content: prompt
         }
       ],
       temperature: 0.01, // Very low temperature for maximum precision
-      max_tokens: 2500
+      max_tokens: 2000 // Adjust as needed
     });
 
     onProgress?.(75);
