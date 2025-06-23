@@ -1,17 +1,42 @@
 import OpenAI from 'openai';
 
-// Initialize OpenAI client
-const openai = new OpenAI({
-  apiKey: import.meta.env.VITE_OPENAI_API_KEY,
-  dangerouslyAllowBrowser: true // Note: In production, API calls should go through your backend
-});
+// Define environment variable type
+interface Env {
+  VITE_OPENAI_API_KEY: string | undefined;
+}
 
 // Helper function to get the OpenAI client
-const getOpenAIClient = (): OpenAI => {
-  if (!openai.apiKey) {
+const getOpenAIClient = async (): Promise<OpenAI> => {
+  // Get the API key from environment variables
+  const apiKey = (window as any)?.import?.meta?.env?.VITE_OPENAI_API_KEY;
+  
+  if (!apiKey) {
+    console.error('OpenAI API key not found in environment variables');
     throw new Error('OpenAI API key is not configured. Please set up your API key first.');
   }
-  return openai;
+
+  try {
+    // Initialize OpenAI client
+    const client = new OpenAI({
+      apiKey: apiKey,
+      dangerouslyAllowBrowser: true
+    });
+
+    // Test the connection
+    await client.chat.completions.create({
+      model: "gpt-3.5-turbo",
+      messages: [{
+        role: "system",
+        content: "Test connection"
+      }],
+      max_tokens: 1
+    });
+
+    return client;
+  } catch (error: any) {
+    console.error('Failed to initialize OpenAI client:', error);
+    throw new Error(`OpenAI initialization error: ${error.message}`);
+  }
 };
 
 export interface ParsedRevenueData {
@@ -35,7 +60,7 @@ export const parseRevenueStatementWithAI = async (
   try {
     onProgress?.(25);
 
-    const client = getOpenAIClient();
+    const client = await getOpenAIClient();
 
     const prompt = `
 You are an expert financial data extraction specialist for oil & gas revenue statements. Analyze these PDF revenue statement pages and extract structured data with EXACT precision matching the training example.
