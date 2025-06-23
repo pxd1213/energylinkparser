@@ -1,5 +1,25 @@
 import OpenAI from 'openai';
 
+// Type declaration for environment variables
+interface ImportMetaEnv {
+  readonly VITE_OPENAI_API_KEY: string;
+}
+
+// Initialize OpenAI client
+const openai = new OpenAI({
+  apiKey: (import.meta as unknown as { env: ImportMetaEnv }).env.VITE_OPENAI_API_KEY,
+  dangerouslyAllowBrowser: true // Note: In production, API calls should go through your backend
+});
+
+// Helper function to get the OpenAI client
+const getOpenAIClient = (): OpenAI => {
+  const apiKey = (import.meta as unknown as { env: ImportMetaEnv }).env.VITE_OPENAI_API_KEY;
+  if (!apiKey || apiKey === '') {
+    throw new Error('OpenAI API key is not configured. Please set up your API key first.');
+  }
+  return openai;
+};
+
 export interface ParsedRevenueData {
   company: string;
   period: string;
@@ -14,26 +34,6 @@ export interface ParsedRevenueData {
   netRevenue: number;
 }
 
-// Lazy initialization of OpenAI client
-let openaiClient: OpenAI | null = null;
-
-const getOpenAIClient = (): OpenAI => {
-  if (!openaiClient) {
-    const apiKey = import.meta.env.VITE_OPENAI_API_KEY;
-    
-    if (!apiKey) {
-      throw new Error('OpenAI API key is not configured. Please set up your API key first.');
-    }
-
-    openaiClient = new OpenAI({
-      apiKey: apiKey,
-      dangerouslyAllowBrowser: true // Note: In production, API calls should go through your backend
-    });
-  }
-  
-  return openaiClient;
-};
-
 export const parseRevenueStatementWithAI = async (
   imageBase64Array: string[],
   onProgress?: (progress: number) => void
@@ -41,7 +41,7 @@ export const parseRevenueStatementWithAI = async (
   try {
     onProgress?.(25);
 
-    const openai = getOpenAIClient();
+    const client = getOpenAIClient();
 
     const prompt = `
 You are an expert financial data extraction specialist for oil & gas revenue statements. Analyze these PDF revenue statement pages and extract structured data with EXACT precision matching the training example.
@@ -160,16 +160,16 @@ Focus on accuracy and precision - the extracted values must match the actual doc
       });
     });
 
-    const completion = await openai.chat.completions.create({
+    const completion = await client.chat.completions.create({
       model: "gpt-4-vision-preview", // Use GPT-4 Vision model
       messages: [
         {
           role: "system",
-          content: "You are a financial data extraction expert specializing in oil & gas revenue statements. Always respond with valid JSON only. Extract exact values from documents with precision. Distinguish carefully between taxes (severance, federal, state, withholding) and deductions (all other operational costs). Verify calculations match expected net payments. Use the training example as your guide: Verde 13-2HZ NBRR (138366-1) GAS with taxes -14.25, deductions -435.42, net 168.85."
+          content: "You are a financial data extraction expert specializing in oil & gas revenue statements. Extract structured data from PDF images with exact precision matching the training example."
         },
         {
-          role: "user",
-          content: content
+          type: "text",
+          text: prompt
         }
       ],
       temperature: 0.01, // Very low temperature for maximum precision
