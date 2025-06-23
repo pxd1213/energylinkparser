@@ -8,7 +8,7 @@ interface Env {
 // Helper function to get the OpenAI client
 const getOpenAIClient = async (): Promise<OpenAI> => {
   // Get the API key from environment variables
-  const apiKey = (window as any)?.import?.meta?.env?.VITE_OPENAI_API_KEY;
+  const apiKey = (window as any).import.meta.env.VITE_OPENAI_API_KEY;
   
   if (!apiKey) {
     console.error('OpenAI API key not found in environment variables');
