@@ -5,11 +5,11 @@ import { getOpenAIKey } from '../config';
 const getOpenAIClient = async (): Promise<OpenAI> => {
   try {
     // Try multiple ways to get the API key
-    let apiKey = getOpenAIKey();
+    let apiKey: string = getOpenAIKey();
     
     if (!apiKey || apiKey === '${OPENAI_API_KEY}' || apiKey === '{{ secrets.OPENAI_API_KEY }}') {
       // Try direct environment access as fallback
-      apiKey = process.env.OPENAI_API_KEY || process.env.VITE_OPENAI_API_KEY;
+      apiKey = process.env.OPENAI_API_KEY || process.env.VITE_OPENAI_API_KEY || '';
       
       if (!apiKey) {
         console.error('OpenAI API key not found in any source');

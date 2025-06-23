@@ -13,11 +13,6 @@ export default defineConfig(({ mode }) => {
     },
     define: {
       'process.env': env
-    },
-    server: {
-      env: {
-        VITE_OPENAI_API_KEY: env.VITE_OPENAI_API_KEY
-      }
     }
   };
 });;
