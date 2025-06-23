@@ -11,8 +11,7 @@ export const getOpenAIClient = async (): Promise<OpenAI> => {
 
     const client = new OpenAI({
       apiKey,
-      dangerouslyAllowBrowser: true,
-      baseURL: 'https://api.openai.com/v1'  // Explicitly set the base URL
+      baseURL: 'https://api.openai.com/v1'
     });
 
     // Test the connection with GPT-4 Vision
