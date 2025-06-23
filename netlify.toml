@@ -20,7 +20,10 @@
 
 [functions]
   node_bundler = "esbuild"
-  node_version = "20"
+
+[functions.node_version]
+  external_node_modules = []
+  version = "20"
 
 [functions.openai]
   memory_size = 1024
