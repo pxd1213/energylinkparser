@@ -11,7 +11,7 @@
   git_repository = "github.com/pxd1213/energylinkparser"
 
 [context.production.environment]
-  VITE_OPENAI_API_KEY = "${VITE_OPENAI_API_KEY}"
+  VITE_OPENAI_API_KEY = "{{ secrets.OPENAI_API_KEY }}"
 
 [[redirects]]
   from = "/*"
