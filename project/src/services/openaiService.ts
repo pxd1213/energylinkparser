@@ -1,35 +1,30 @@
-import OpenAI from 'openai';
-
-// Define environment variable type
-interface Env {
-  VITE_OPENAI_API_KEY: string | undefined;
+interface WindowWithEnv extends Window {
+  import: {
+    meta: {
+      env: {
+        VITE_OPENAI_API_KEY: string;
+      }
+    }
+  }
 }
+
+import OpenAI from 'openai';
 
 // Helper function to get the OpenAI client
 const getOpenAIClient = async (): Promise<OpenAI> => {
-  // Get the API key from environment variables
-  const apiKey = (window as any).import.meta.env.VITE_OPENAI_API_KEY;
-  
-  if (!apiKey) {
-    console.error('OpenAI API key not found in environment variables');
-    throw new Error('OpenAI API key is not configured. Please set up your API key first.');
-  }
-
   try {
+    // Get the API key from environment variables
+    const apiKey = ((window as any) || {}).import?.meta?.env?.VITE_OPENAI_API_KEY;
+    
+    if (!apiKey) {
+      console.error('OpenAI API key not found in environment variables');
+      throw new Error('OpenAI API key is not configured. Please set up your API key first.');
+    }
+
     // Initialize OpenAI client
     const client = new OpenAI({
       apiKey: apiKey,
       dangerouslyAllowBrowser: true
-    });
-
-    // Test the connection
-    await client.chat.completions.create({
-      model: "gpt-3.5-turbo",
-      messages: [{
-        role: "system",
-        content: "Test connection"
-      }],
-      max_tokens: 1
     });
 
     return client;
